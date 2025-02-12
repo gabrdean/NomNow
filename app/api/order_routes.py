@@ -7,17 +7,70 @@ order_routes = Blueprint("orders", __name__)
 
 
 # Get all orders for the current user
+# @order_routes.route("/")
+# @login_required
+# def get_orders():
+#     orders = Order.query.filter_by(user_id=current_user.id).all()
+#     if not orders:
+#         return {"message": "No orders found"}, 404
+
+#     return jsonify({"orders": [order.to_dict() for order in orders]}), 200
+
 @order_routes.route("/")
 @login_required
 def get_orders():
     orders = Order.query.filter_by(user_id=current_user.id).all()
     if not orders:
-        return {"message": "No orders found"}, 404
+        return jsonify({"message": "No orders found"}), 404
 
-    return jsonify({"orders": [order.to_dict() for order in orders]}), 200
+    formatted_orders = []
+    for order in orders:
+        # Get restaurant details
+        restaurant = order.restaurants
+        restaurant_data = (
+            {
+                "id": restaurant.id,
+                "name": restaurant.name,
+                "image": restaurant.store_image,
+            }
+            if restaurant
+            else {"id": None, "name": "Unknown", "image": None}
+        )
 
+        # Get order items with menu item names
+        order_items = [
+            {
+                "id": item.id,
+                "menu_item_name": item.menu_items.name,  # Assuming relationship is set
+                "quantity": item.quantity,
+                "price": item.price, #item.menu_item.price
+            }
+            for item in order.order_items
+        ]
 
-# Get details of a specific order
+        formatted_orders.append(
+            {
+                "id": order.id,
+                "createdAt": order.created_at,
+                "updatedAt": order.updated_at,
+                "status": order.status,
+                "totalCost": float(order.total_cost),  # Ensure it's a float
+                "restaurant": restaurant_data,
+                "orderItems": [
+                    {
+                        "id": item.id,
+                        "menu_item_name": item.menu_items.name,
+                        "quantity": item.quantity,
+                        "price": float(item.price),  # Ensure price is a float
+                    }
+                    for item in order.order_items
+                ],
+            }
+        )
+
+    return jsonify({"orders": formatted_orders}), 200
+
+# Get details of a specific order made by the user
 @order_routes.route("/<int:order_id>")
 @login_required
 def get_order(order_id):
@@ -50,60 +103,80 @@ def get_orders_by_restaurant(restaurant_id):
 def create_order():
     data = request.get_json()
     restaurant_id = data.get("restaurant_id")
-    items = data.get("items", [])  # List of {"menuitem_id": X, "quantity": Y}
+    items = data.get("items", [])  # List of {"menu_item_id": X, "quantity": Y}
     promo = data.get("promo", None)
 
     if not restaurant_id:
         return {"message": "Restaurant ID is required"}, 400
 
     # Validate that all menu items belong to the same restaurant
-    if items:
-        menuitem_ids = [item["menuitem_id"] for item in items]
-        menu_items = MenuItem.query.filter(MenuItem.id.in_(menuitem_ids)).all()
-        if not menu_items:
-            return {"message": "No valid menu items found."}, 400
+    menu_item_ids = [int(item["menu_item_id"]) for item in items]
+    menu_items = MenuItem.query.filter(MenuItem.id.in_(menu_item_ids)).all()
 
-        # Ensure all menu items belong to the same restaurant
-        for menu_item in menu_items:
-            if menu_item.restaurant_id != restaurant_id:
-                return {"message": "All items must be from the same restaurant."}, 400
+    if not menu_items or len(menu_items) != len(menu_item_ids):
+        return {"message": "Invalid menu items provided."}, 400
 
-    # Create new order
+    # Verify that all items are from the same restaurant
+    for menu_item in menu_items:
+        if int(menu_item.restaurant_id) != int(restaurant_id):
+            return {"message": "All items must be from the same restaurant."}, 400
+
+    total_cost = sum(
+        menu_item.price * int(item["quantity"])
+        for menu_item, item in zip(menu_items, items)
+    )
+
     new_order = Order(
         user_id=current_user.id,
         restaurant_id=restaurant_id,
-        status="Active",  # Start as cart mode
+        status="Active",
         promo=promo,
+        total_cost=total_cost,  # Set the total_cost here
     )
+
     db.session.add(new_order)
     db.session.flush()  # Get order ID before adding items
 
     # Add items to order
-    total_cost = 0
     order_items = []
     for item in items:
-        menu_item = MenuItem.query.get(item["menuitem_id"])
+        menu_item = MenuItem.query.get(item["menu_item_id"])
         quantity = item["quantity"]
 
         order_items.append(
             OrderItem(
                 order_id=new_order.id,
-                menuitem_id=menu_item.id,
+                menu_item_id=menu_item.id,
                 quantity=quantity,
                 price=menu_item.price,
             )
         )
 
-        total_cost += menu_item.price * quantity
-
     db.session.add_all(order_items)
-    new_order.total_cost = total_cost  # Update total price
     db.session.commit()
 
     return jsonify(new_order.to_dict()), 201
 
+"""
+example request body: {
+    "restaurant_id": "1",
+    "items": [
+        {
+            "menu_item_id": "2",
+            "quantity": "2"
+        },
+        {
+            "menu_item_id": "3",
+            "quantity": "1"
+        }
+    ]
+    "promo": "DISCOUNT10"
+}
+"""
+
+
 # Modify items in an order while it's in the cart (status = Active)
-@order_routes.route("/<int:order_id>/items", methods=["PUT"])
+@order_routes.route("/<int:order_id>", methods=["PUT"])
 @login_required
 def update_order_items(order_id):
     order = Order.query.get(order_id)
@@ -124,11 +197,11 @@ def update_order_items(order_id):
 
     # Process new or updated items
     for item in items:
-        menu_item = MenuItem.query.get(item["menuitem_id"])
+        menu_item = MenuItem.query.get(item["menu_item_id"])
         quantity = item["quantity"]
 
         order_item = OrderItem.query.filter_by(
-            order_id=order.id, menuitem_id=menu_item.id
+            order_id=order.id, menu_item_id=menu_item.id
         ).first()
 
         if order_item:
@@ -140,7 +213,7 @@ def update_order_items(order_id):
             db.session.add(
                 OrderItem(
                     order_id=order.id,
-                    menuitem_id=menu_item.id,
+                    menu_item_id=menu_item.id,
                     quantity=quantity,
                     price=menu_item.price,
                 )
@@ -152,10 +225,24 @@ def update_order_items(order_id):
     db.session.commit()
 
     return jsonify(order.to_dict()), 200
+"""
+{
+    "items": [
+        {
+            "menu_item_id": 2,
+            "quantity": 3
+        },
+        {
+            "menu_item_id": 5,
+            "quantity": 3
+        }
+    ]
+}
+"""
 
 
-# User finalizes the order (status = Completed).
-@order_routes.route("/<int:order_id>/complete", methods=["PUT"])
+# User finalizes the order (status = Submitted).
+@order_routes.route("/<int:order_id>/submit", methods=["PUT"])
 @login_required
 def complete_order(order_id):
     order = Order.query.get(order_id)
@@ -173,7 +260,7 @@ def complete_order(order_id):
     if not order_items:
         return {"message": "Cannot complete an empty order. Add items first."}, 400
 
-    order.status = "Completed"
+    order.status = "Submitted"
     db.session.commit()
 
     return jsonify(order.to_dict()), 200
@@ -195,16 +282,6 @@ def delete_order(order_id):
     db.session.commit()
 
     return {"message": "Successfully deleted order"}, 200
-
-
-
-
-
-
-
-
-
-
 
 
 # # possible future routes
@@ -286,7 +363,7 @@ def delete_order(order_id):
 #     data = request.get_json()
 #     items = data.get(
 #         "items"
-#     )  # Expected format: [{"menuitem_id": 1, "quantity": 2}, {...}]
+#     )  # Expected format: [{"menu_item_id": 1, "quantity": 2}, {...}]
 #     promo = data.get("promo", None)
 
 #     if not items or not isinstance(items, list):
@@ -299,23 +376,23 @@ def delete_order(order_id):
 
 #     # Validate menu items and calculate total cost
 #     for item in items:
-#         menuitem_id = item.get("menuitem_id")
+#         menu_item_id = item.get("menu_item_id")
 #         quantity = item.get("quantity", 1)
 
-#         menu_item = MenuItem.query.get(menuitem_id)
+#         menu_item = MenuItem.query.get(menu_item_id)
 #         if not menu_item:
-#             return {"message": f"Menu item with ID {menuitem_id} not found"}, 404
+#             return {"message": f"Menu item with ID {menu_item_id} not found"}, 404
 
 #         total_cost += menu_item.price * quantity
 
 #         order_items.append(
-#             OrderItem(menuitem_id=menuitem_id, quantity=quantity, price=menu_item.price)
+#             OrderItem(menu_item_id=menu_item_id, quantity=quantity, price=menu_item.price)
 #         )
 
 #     # Create order
 #     new_order = Order(
 #         user_id=current_user.id,
-#         restaurant_id=menu_item.restaurantId,
+#         restaurant_id=menu_item.restaurant_id,
 #         total_cost=total_cost,
 #         promo=promo,
 #     )

@@ -1,6 +1,7 @@
 //Restaurant Actions
 
 const GET_RESTAURANTS = 'GET_RESTAURANTS';
+const GET_USER_RESTAURANTS = 'GET_USER_RESTAURANTS'
 const GET_RESTAURANT = 'GET_RESTAURANT';
 const CREATE_RESTAURANT = 'CREATE_RESTAURANT';
 const UPDATE_RESTAURANT = 'UPDATE_RESTAURANT';
@@ -12,7 +13,7 @@ export const getUserRestaurants = () => async (dispatch) => {
     try {
         const response = await fetch('/api/manage/');
         const data = await response.json();
-        dispatch({ type: GET_RESTAURANTS, payload: data.restaurants });
+        dispatch({ type: GET_USER_RESTAURANTS, payload: data.restaurants });
     } catch (error) {
         dispatch({ type: RESTAURANT_ERROR, payload: error.message });
     }
@@ -24,6 +25,17 @@ export const getRestaurant = (id) => async (dispatch) => {
         const response = await fetch(`/api/manage/${id}`);
         const data = await response.json();
         dispatch({ type: GET_RESTAURANT, payload: data });
+    } catch (error) {
+        dispatch({ type: RESTAURANT_ERROR, payload: error.message });
+    }
+};
+
+// Get all restaurants
+export const getAllRestaurants = () => async (dispatch) => {
+    try {
+        const response = await fetch('/api/restaurants/');
+        const data = await response.json();
+        dispatch({ type: GET_RESTAURANTS, payload: data.restaurants });
     } catch (error) {
         dispatch({ type: RESTAURANT_ERROR, payload: error.message });
     }
@@ -73,24 +85,34 @@ export const updateRestaurant = (id, formData) => async (dispatch) => {
     }
 };
 
+
 // Delete a restaurant
 export const deleteRestaurant = (id) => async (dispatch) => {
     try {
         const response = await fetch(`/api/restaurants/${id}`, {
             method: 'DELETE'
         });
-
+        
         if (!response.ok) {
-            throw new Error('Failed to delete restaurant');
+            const data = await response.json();
+            throw new Error(data.errors?.[0] || 'Failed to delete restaurant');
         }
 
-        dispatch({ type: DELETE_RESTAURANT, payload: id });
+        const data = await response.json();
+        
+        if (data.id) {
+            dispatch({ type: DELETE_RESTAURANT, payload: data.id });
+            return true; // Return success
+        } else {
+            throw new Error('Invalid response from server');
+        }
     } catch (error) {
         dispatch({ type: RESTAURANT_ERROR, payload: error.message });
+        throw error; // Re-throw to handle in component
     }
 };
 
-// ---- Reducers
+// ---- Reducer
 
 const initialState = {
     restaurants: [],
@@ -101,7 +123,7 @@ const initialState = {
 
 const restaurantReducer = (state = initialState, action) => {
     switch (action.type) {
-        case GET_RESTAURANTS:
+        case GET_USER_RESTAURANTS:
             return {
                 ...state,
                 restaurants: action.payload,
@@ -112,6 +134,13 @@ const restaurantReducer = (state = initialState, action) => {
             return {
                 ...state,
                 currentRestaurant: action.payload,
+                error: null
+            };
+
+        case GET_RESTAURANTS:
+            return {
+                ...state,
+                restaurants: action.payload,
                 error: null
             };
             

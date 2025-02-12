@@ -14,16 +14,22 @@ export function ModalProvider({ children }) {
     setModalContent(null); // clear the modal contents
     // If callback function is truthy, call the callback function and reset it
     // to null:
+    document.body.classList.remove('no-scroll');
     if (typeof onModalClose === 'function') {
       setOnModalClose(null);
       onModalClose();
     }
   };
 
+  const openModal = (content) => {
+		setModalContent(content);
+		document.body.classList.add('no-scroll');
+  };
+
   const contextValue = {
     modalRef, // reference to modal div
     modalContent, // React component to render inside modal
-    setModalContent, // function to set the React component to render inside modal
+    setModalContent: openModal, // function to set the React component to render inside modal
     setOnModalClose, // function to set the callback function called when modal is closing
     closeModal // function to close the modal
   };
@@ -46,13 +52,17 @@ export function Modal() {
 
   // Render the following component to the div referenced by the modalRef
   return ReactDOM.createPortal(
-    <div id="modal">
-      <div id="modal-background" onClick={closeModal} />
-      <div id="modal-content">
-        {modalContent}
-      </div>
-    </div>,
-    modalRef.current
+		<div id='modal'>
+			<div id='modal-background' onClick={closeModal} />
+			<div id='modal-content'>
+				{/* Ensure the close button is inside modal-content */}
+				<button className='close-button' onClick={closeModal}>
+					×
+				</button>
+				{modalContent}
+			</div>
+		</div>,
+		modalRef.current
   );
 }
 

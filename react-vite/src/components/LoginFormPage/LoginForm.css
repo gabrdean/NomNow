@@ -1,0 +1,15 @@
+.login-form-page{
+    justify-items: center;
+}
+.content{
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+    width: 300px
+}
+.login-form{
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+    width: 100%;
+}

@@ -1,0 +1,127 @@
+/* Styling for the form container */
+form {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    max-width: 500px;
+    margin: 40px auto;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Styling for form headings */
+  h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+  }
+  
+  /* Styling for all input, textarea, and select fields */
+  input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  
+  /* Styling for number inputs */
+  /* input[type="number"] {
+    -moz-appearance: textfield;
+  } */
+  
+  /* Styling for input, textarea, and select when focused */
+  input:focus, textarea:focus, select:focus {
+    border-color: #1DB954; /* UberEats Green */
+    outline: none;
+    box-shadow: 0 0 4px rgba(29, 185, 84, 0.3);
+  }
+  
+  /* Styling for textarea to allow vertical resizing */
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+  
+  
+  /* Button hover effect */
+  button:hover {
+    background-color: #17a14a;
+  }
+  
+  /* Button active effect */
+  button:active {
+    background-color: #149c43;
+  }
+  
+  /* Button focus effect */
+  button:focus {
+    outline: none;
+  }
+  
+  /* Error message styling */
+  div[style*="color: red"] {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  
+  /* Media query for smaller screens */
+  @media (max-width: 600px) {
+    form {
+      padding: 16px;
+    }
+  
+    input, textarea, select, button {
+      font-size: 0.9rem;
+    }
+  }
+  
+  /* Styling for the Back Button */
+.back-button {
+    background-color: #1DB954; /* UberEats Green */
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .back-button:hover {
+    background-color: #17a14a;
+  }
+
+  .back-button:active {
+    background-color: #149c43;
+  }
+  
+  /* Styling for the Submit Button */
+  .submit-button {
+    background-color: #1DB954; /* UberEats Green */
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .submit-button:hover {
+    background-color: #17a14a;
+  }
+  
+  .submit-button:active {
+    background-color: #149c43;
+  }

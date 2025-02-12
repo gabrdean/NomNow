@@ -1,0 +1,70 @@
+/* react-vite/src/components/Reviews/Reviews.css */
+
+.reviews-container {
+  padding: 20px;
+}
+
+.review-list {
+  margin-top: 20px;
+}
+
+.review-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.rating-container {
+  margin-top: 10px;
+}
+
+.rating-item {
+  margin-bottom: 5px;
+}
+
+.rating-item span {
+  font-size: 18px;
+  color: #ffcc00; /* Yellow color for stars */
+}
+
+.review-actions {
+  margin-top: 10px;
+}
+
+.review-actions button {
+  margin-right: 10px;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.review-actions button:hover {
+  background-color: #e0e0e0;
+}
+
+/* Star Rating Styles for the form */
+.star-rating {
+  margin: 10px 0;
+}
+
+.star-rating label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.star-rating .star {
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-rating .star.selected {
+  color: #ffcc00; /* Yellow color for selected stars */
+}
+
+.star-rating .star:hover {
+  color: #ffcc00; /* Yellow color on hover */
+}

@@ -8,7 +8,9 @@ def seed_orders():
             restaurant_id=(i % 6) + 1,
             user_id=((i % 5) + 1),
             total_cost=round(15 + (i * 2.5), 2),
-            status="Completed"
+            status="Submitted"
+            if i % 2 == 0
+            else "Completed"
             if i % 3 == 0
             else "Active"
             if i % 4 == 0

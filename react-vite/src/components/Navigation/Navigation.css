@@ -1,3 +1,128 @@
-.profile-dropdown {
-  position: absolute;
+.menu-dropdown {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 200px;
+  z-index: 1100;
+  background-color: #FFFFFF;
+  display: grid;
+
+}
+.menu-button{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: flex-start;
+  margin-right: auto;
+}
+.hidden{
+  display: none;
+}
+li{
+  list-style: none;
+}
+
+.navContainer{
+  width: 100%;
+  background-color: #FFFFFF;
+  position: sticky;
+  top: 0;
+  padding: 0;
+  z-index: 1000;
+}
+.nav{
+  display: flex;
+
+  max-width: 100%;
+  z-index: 1000;
+  align-items: center;
+  background-color: #FFFFFF;
+  padding: 20px;
+  gap: 10px;
+  
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+ul.nav {
+  margin: 0;
+  padding: 20px;
+}
+
+.icon{
+  height: 20px;
+  width: 20px;
+}
+.user-actions{
+  display: flex;
+  align-items: center;
+  justify-self: flex-end;
+  gap: 10px;
+  margin-left: auto;
+}
+
+
+.profile{
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  gap : 10px;
+}
+.profile-info{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+.profile img{
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+}
+.profile-info h4{
+  margin: 0;
+}
+
+
+/* Clickables */
+button:hover{
+  cursor: pointer;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+.checkout-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8f8f8;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.back-to-store {
+  background: none;
+  border: none;
+  color: black;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.checkout-title {
+  font-size: 20px;
+  font-weight: bold;
 }

@@ -1,24 +1,68 @@
 #modal {
   position: fixed;
   top: 0;
-  right: 0;
   left: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 #modal-background {
-  position: fixed;
+  position: absolute;
+  width: 100%;
+  height: 100%;
   top: 0;
-  right: 0;
   left: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.no-scroll {
+  overflow: hidden;
+  height: 100vh;
 }
 
 #modal-content {
+  position: relative;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+#modal-content .close-button {
   position: absolute;
-  background-color:white;
+  top: 12px;
+  left: 12px;
+  background: #f2f2f2;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  z-index: 10;
+}
+
+#modal-content .close-button:hover {
+  background: #e0e0e0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
